@@ -1,5 +1,5 @@
 (function () {
-  console.log('[Edie QR] v2 loaded - BLE pairing mode available');
+  console.log('[Edie QR] v3 loaded');
   const DEFAULT_LOGO = 'assets/edie.png';
 
   const DEFAULT_BLE = {
