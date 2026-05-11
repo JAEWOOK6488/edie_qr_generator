@@ -1,5 +1,14 @@
 (function () {
-  console.log('[Edie QR] v3 loaded');
+  console.log('[Edie QR] v4 loaded');
+
+  const URL_BASE = 'https://jaewook6488.github.io/edie_qr_generator/p.html';
+
+  function b64url(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
   const DEFAULT_LOGO = 'assets/edie.png';
 
   const DEFAULT_BLE = {
@@ -47,7 +56,18 @@
       mtu: parseInt($('edieMtu').value, 10) || 247,
     };
     const json = JSON.stringify(payload);
-    $('data').value = json;
+    const fmt = $('edieFormat').value;
+    let qrText;
+    if (fmt === 'json') {
+      qrText = json;
+    } else {
+      const encoded = b64url(json);
+      qrText = fmt === 'uri'
+        ? `edie://pair?d=${encoded}`
+        : `${URL_BASE}#${encoded}`;
+    }
+    $('data').value = qrText;
+    $('edieQrText').textContent = qrText;
     $('ediePayload').textContent = JSON.stringify(payload, null, 2);
   }
 
@@ -143,6 +163,11 @@
       syncEdiePayload();
       generate();
     });
+  });
+
+  $('edieFormat').addEventListener('change', () => {
+    syncEdiePayload();
+    generate();
   });
 
   $('edieResetUuids').addEventListener('click', () => {

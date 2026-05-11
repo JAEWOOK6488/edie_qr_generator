@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edie 페어링</title>
+  <link rel="icon" type="image/png" href="assets/edie.png" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard",
+        "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: #f5f3ef;
+      color: #1f2024;
+      text-align: center;
+    }
+    img.logo {
+      width: 96px; height: 96px; border-radius: 24px;
+      background: white; padding: 8px;
+      box-shadow: 0 8px 24px rgba(20, 20, 30, 0.08);
+    }
+    h1 { margin: 8px 0 0; font-size: 22px; letter-spacing: -0.02em; }
+    p { color: #6b6f76; margin: 0; max-width: 420px; }
+    a.btn {
+      display: inline-block;
+      background: #1a73e8; color: white;
+      padding: 14px 24px; border-radius: 12px;
+      text-decoration: none; font-weight: 600;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.25);
+    }
+    a.btn:active { transform: translateY(1px); }
+    .fallback {
+      margin-top: 24px;
+      font-size: 13px; color: #6b6f76;
+      max-width: 360px;
+    }
+    .fallback a { color: #1a73e8; }
+    code {
+      display: inline-block;
+      background: #1f2024; color: #e8e4d8;
+      padding: 2px 8px; border-radius: 6px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <img class="logo" src="assets/edie.png" alt="Edie" />
+  <h1>Edie 로봇 페어링</h1>
+  <p>이 QR은 Edie 앱에서 BLE 자동 연결용입니다.</p>
+  <a id="openApp" class="btn" href="#">Edie 앱에서 열기</a>
+  <div class="fallback">
+    Edie 앱이 설치되어 있지 않다면 위 버튼이 동작하지 않습니다.<br>
+    앱 설치 후 이 페이지로 다시 돌아오거나 QR을 다시 스캔하세요.
+  </div>
+  <script>
+    (function () {
+      const hash = location.hash.replace(/^#/, '');
+      if (!hash) return;
+      const deepLink = 'edie://pair?d=' + hash;
+      document.getElementById('openApp').href = deepLink;
+      // 모바일에서 자동으로 딥링크 시도 — 앱이 있으면 즉시 열림, 없으면 그대로 페이지 유지
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        setTimeout(function () { location.href = deepLink; }, 400);
+      }
+    })();
+  </script>
+</body>
+</html>

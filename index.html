@@ -42,6 +42,16 @@
             <input type="number" id="edieMtu" value="247" min="23" max="517" />
           </div>
         </div>
+        <div class="row">
+          <div class="field">
+            <label for="edieFormat">QR 출력 형식 (내용 숨김 여부)</label>
+            <select id="edieFormat">
+              <option value="uri" selected>URI 딥링크 — edie:// (내용 숨김, 추천)</option>
+              <option value="url">URL 링크 — https:// (Universal Link)</option>
+              <option value="json">JSON 평문 (디버깅용, 내용 노출)</option>
+            </select>
+          </div>
+        </div>
         <details class="edie-advanced">
           <summary>고급 — UUID 직접 편집 (보통 그대로 두세요)</summary>
           <div class="field">
@@ -59,7 +69,9 @@
           <button type="button" id="edieResetUuids" class="ghost">기본 UUID로 복원</button>
         </details>
         <div class="payload-box">
-          <label>QR에 들어갈 페이로드 (JSON)</label>
+          <label>실제 QR 내용 (스캐너가 읽는 텍스트)</label>
+          <pre id="edieQrText"></pre>
+          <label style="margin-top:8px">디코딩된 페이로드 (참고용)</label>
           <pre id="ediePayload"></pre>
         </div>
       </div>
@@ -191,6 +203,6 @@
   </footer>
 
   <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

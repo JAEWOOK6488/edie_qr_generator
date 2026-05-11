@@ -31,13 +31,48 @@
 }
 ```
 
-UUID는 `edie_ble/BLE_SPEC.md`와 동일합니다. 로봇 ID(`EDIE_XXX`)만 바꾸면 각 기체별 스티커를 찍어낼 수 있습니다. BLE 모드 진입 시 흑백 + 오류 보정 H + 사각형 모듈로 **스티커 인쇄 최적화** 설정이 자동 적용됩니다.
+UUID는 `edie_ble/BLE_SPEC.md`와 동일합니다. 로봇 ID(`EDIE_XXX`)만 바꾸면 각 기체별 스티커를 찍어낼 수 있습니다.
+
+### QR 출력 형식 (스캐너에 노출되는 내용)
+
+일반 카메라 앱으로 QR을 스캔하면 안에 든 텍스트가 그대로 보입니다. UUID 같은 내용을 숨기려면 세 가지 형식 중 선택할 수 있습니다.
+
+| 형식 | QR 내용 | 카메라 앱 표시 |
+|---|---|---|
+| **URI 딥링크** (기본) | `edie://pair?d=<base64url(JSON)>` | "Edie 앱에서 열기" |
+| **URL 링크** | `https://jaewook6488.github.io/edie_qr_generator/p.html#<base64url>` | 링크 → `p.html`이 `edie://`로 자동 리다이렉트 |
+| **JSON 평문** | `{"v":1,"name":"EDIE_001",...}` | UUID 등이 그대로 노출 (디버깅용) |
+
+- URI/URL 형식은 base64url로 인코딩되어 UUID가 사람 눈에 보이지 않습니다.
+- Unity 앱은 OS에 `edie://` URL Scheme(Android: intent filter, iOS: Info.plist `CFBundleURLSchemes`)을 등록해야 자동 실행됩니다.
+- URL 형식의 `p.html`은 모바일 접속 시 자동으로 `edie://` 딥링크를 시도. 앱 없으면 안내 페이지 표시.
 
 ### Unity (Central) 측 처리 흐름
 
 ```csharp
-// 1. QR 디코드
-var payload = JsonUtility.FromJson<EdiePayload>(qrText);
+using System;
+using System.Text;
+using System.Web;  // System.Web.dll 참조
+
+string DecodeQrPayload(string qrText) {
+    string b64;
+    if (qrText.StartsWith("edie://pair?d=")) {
+        b64 = qrText.Substring("edie://pair?d=".Length);
+    } else if (qrText.Contains("/p.html#")) {
+        b64 = qrText.Substring(qrText.IndexOf('#') + 1);
+    } else {
+        return qrText;  // JSON 평문 형식
+    }
+    // base64url → base64
+    b64 = b64.Replace('-', '+').Replace('_', '/');
+    int pad = (4 - b64.Length % 4) % 4;
+    b64 += new string('=', pad);
+    return Encoding.UTF8.GetString(Convert.FromBase64String(b64));
+}
+
+// 1. QR 디코드 + JSON 파싱
+var json = DecodeQrPayload(qrText);
+var payload = JsonUtility.FromJson<EdiePayload>(json);
 if (payload.type != "edie_ble" || payload.v != 1) throw new Exception("not an edie QR");
 
 // 2. BLE 스캔 — Service UUID로 필터, Name으로 매칭
