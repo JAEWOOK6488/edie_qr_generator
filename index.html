@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edie QR 생성기</title>
+  <meta name="description" content="로고와 색상을 자유롭게 커스터마이징할 수 있는 QR 코드 생성기" />
+  <link rel="icon" type="image/png" href="assets/edie.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <img src="assets/edie.png" alt="Edie" class="hero-logo" />
+    <div>
+      <h1>Edie QR 생성기</h1>
+      <p class="subtitle">색상, 모양, 로고를 자유롭게 커스터마이징해서 QR 코드를 만들어보세요.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel controls">
+      <div class="field">
+        <label for="data">내용 (URL 또는 텍스트)</label>
+        <textarea id="data" rows="3" placeholder="https://example.com">https://github.com/JAEWOOK6488/edie_qr_generator</textarea>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="size">크기 (px)</label>
+          <input type="number" id="size" min="128" max="2048" step="32" value="512" />
+        </div>
+        <div class="field">
+          <label for="margin">여백</label>
+          <input type="number" id="margin" min="0" max="40" step="1" value="8" />
+        </div>
+        <div class="field">
+          <label for="ecLevel">오류 보정 (로고용 H 권장)</label>
+          <select id="ecLevel">
+            <option value="L">L (7%)</option>
+            <option value="M">M (15%)</option>
+            <option value="Q">Q (25%)</option>
+            <option value="H" selected>H (30%)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="dotStyle">점 모양</label>
+          <select id="dotStyle">
+            <option value="square">사각형</option>
+            <option value="rounded" selected>둥근 사각형</option>
+            <option value="dots">원형 점</option>
+            <option value="classy">클래시</option>
+            <option value="classy-rounded">클래시 라운드</option>
+            <option value="extra-rounded">엑스트라 라운드</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cornerSquareStyle">코너 사각형</label>
+          <select id="cornerSquareStyle">
+            <option value="square">사각형</option>
+            <option value="dot">점</option>
+            <option value="extra-rounded" selected>둥글게</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cornerDotStyle">코너 점</label>
+          <select id="cornerDotStyle">
+            <option value="square">사각형</option>
+            <option value="dot" selected>점</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="dotColor">점 색상</label>
+          <input type="color" id="dotColor" value="#1a1a1a" />
+        </div>
+        <div class="field">
+          <label for="bgColor">배경 색상</label>
+          <input type="color" id="bgColor" value="#ffffff" />
+        </div>
+        <div class="field checkbox">
+          <label><input type="checkbox" id="transparentBg" /> 투명 배경</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="cornerColor">코너 색상</label>
+          <input type="color" id="cornerColor" value="#1a1a1a" />
+        </div>
+        <div class="field">
+          <label for="useGradient">그라데이션</label>
+          <select id="useGradient">
+            <option value="none" selected>사용 안 함</option>
+            <option value="linear">선형</option>
+            <option value="radial">방사형</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="gradientColor">그라데이션 보조색</label>
+          <input type="color" id="gradientColor" value="#6a5acd" />
+        </div>
+      </div>
+
+      <fieldset class="logo-box">
+        <legend>로고 설정</legend>
+        <div class="row">
+          <div class="field checkbox">
+            <label><input type="checkbox" id="useLogo" checked /> 로고 사용</label>
+          </div>
+          <div class="field">
+            <label for="logoSize">로고 크기 (0.1 ~ 0.5)</label>
+            <input type="number" id="logoSize" min="0.1" max="0.5" step="0.05" value="0.28" />
+          </div>
+          <div class="field">
+            <label for="logoMargin">로고 주변 여백</label>
+            <input type="number" id="logoMargin" min="0" max="40" step="1" value="6" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field checkbox">
+            <label><input type="checkbox" id="hideDotsBehindLogo" checked /> 로고 뒤 점 숨기기</label>
+          </div>
+          <div class="field file-field">
+            <label for="logoFile">로고 교체 (선택)</label>
+            <input type="file" id="logoFile" accept="image/*" />
+            <button type="button" id="resetLogo" class="ghost">기본 Edie 로고로</button>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button id="generateBtn" class="primary">QR 생성</button>
+        <button id="downloadPng" class="secondary">PNG 다운로드</button>
+        <button id="downloadSvg" class="secondary">SVG 다운로드</button>
+      </div>
+    </section>
+
+    <section class="panel preview">
+      <div id="qrContainer" class="qr-canvas"></div>
+      <p class="hint">로고를 사용할 때는 오류 보정 레벨을 <strong>H</strong>로 두는 것을 권장합니다.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made with <span class="heart">♥</span> for Edie · <a href="https://github.com/JAEWOOK6488/edie_qr_generator" target="_blank" rel="noopener">GitHub</a></p>
+  </footer>
+
+  <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
