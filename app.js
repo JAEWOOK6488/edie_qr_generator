@@ -1,11 +1,61 @@
 (function () {
   const DEFAULT_LOGO = 'assets/edie.png';
 
+  const DEFAULT_BLE = {
+    svc: '13ED935D-24D0-473C-A129-6659BD3CB1D8',
+    tx:  'BA087F5F-E068-4FA1-AA11-A8AAD60AE31F',
+    rx:  '35D7B2A9-36AB-4003-BB15-9A03178AF5B9',
+    mtu: 247,
+  };
+
   const $ = (id) => document.getElementById(id);
   const container = $('qrContainer');
 
   let currentLogo = DEFAULT_LOGO;
   let qr = null;
+  let mode = 'generic';
+
+  function setMode(next) {
+    mode = next;
+    document.querySelectorAll('.mode-tab').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.mode === next);
+    });
+    $('genericFields').hidden = (next !== 'generic');
+    $('edieFields').hidden = (next !== 'edie');
+    if (next === 'edie') {
+      applyStickerDefaults();
+      syncEdiePayload();
+    }
+    generate();
+  }
+
+  function applyStickerDefaults() {
+    $('dotColor').value = '#000000';
+    $('cornerColor').value = '#000000';
+    $('bgColor').value = '#ffffff';
+    $('transparentBg').checked = false;
+    $('useGradient').value = 'none';
+    $('ecLevel').value = 'H';
+    $('margin').value = '8';
+    $('dotStyle').value = 'square';
+    $('cornerSquareStyle').value = 'square';
+    $('cornerDotStyle').value = 'square';
+  }
+
+  function syncEdiePayload() {
+    const payload = {
+      v: 1,
+      type: 'edie_ble',
+      name: ($('edieId').value || '').trim() || 'EDIE_001',
+      svc: ($('edieSvc').value || '').trim(),
+      tx:  ($('edieTx').value  || '').trim(),
+      rx:  ($('edieRx').value  || '').trim(),
+      mtu: parseInt($('edieMtu').value, 10) || 247,
+    };
+    const json = JSON.stringify(payload);
+    $('data').value = json;
+    $('ediePayload').textContent = JSON.stringify(payload, null, 2);
+  }
 
   function readOptions() {
     const size = parseInt($('size').value, 10) || 512;
@@ -80,12 +130,35 @@
 
   function downloadAs(ext) {
     if (!qr) generate();
-    qr.download({ name: 'edie-qr', extension: ext });
+    const name = mode === 'edie'
+      ? `edie-ble-${($('edieId').value || 'EDIE_001').trim()}`
+      : 'edie-qr';
+    qr.download({ name, extension: ext });
   }
 
   $('generateBtn').addEventListener('click', generate);
   $('downloadPng').addEventListener('click', () => downloadAs('png'));
   $('downloadSvg').addEventListener('click', () => downloadAs('svg'));
+
+  document.querySelectorAll('.mode-tab').forEach((btn) => {
+    btn.addEventListener('click', () => setMode(btn.dataset.mode));
+  });
+
+  ['edieId', 'edieSvc', 'edieTx', 'edieRx', 'edieMtu'].forEach((id) => {
+    $(id).addEventListener('input', () => {
+      syncEdiePayload();
+      generate();
+    });
+  });
+
+  $('edieResetUuids').addEventListener('click', () => {
+    $('edieSvc').value = DEFAULT_BLE.svc;
+    $('edieTx').value  = DEFAULT_BLE.tx;
+    $('edieRx').value  = DEFAULT_BLE.rx;
+    $('edieMtu').value = String(DEFAULT_BLE.mtu);
+    syncEdiePayload();
+    generate();
+  });
 
   $('logoFile').addEventListener('change', (e) => {
     const file = e.target.files && e.target.files[0];
@@ -118,5 +191,6 @@
     el.addEventListener(evt, generate);
   });
 
+  syncEdiePayload();
   generate();
 })();

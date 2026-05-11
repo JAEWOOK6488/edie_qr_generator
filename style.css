@@ -79,6 +79,78 @@ body {
   flex: 1;
 }
 
+.mode-tabs {
+  display: flex;
+  gap: 6px;
+  background: #f1efe9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.mode-tab {
+  flex: 1;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: 9px;
+}
+
+.mode-tab.active {
+  background: white;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.mode-tab:not(.active):hover {
+  color: var(--text);
+}
+
+.edie-advanced {
+  margin: 4px 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #fafaf7;
+}
+
+.edie-advanced summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+  padding: 4px 0;
+}
+
+.edie-advanced[open] summary {
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.payload-box {
+  margin-bottom: 14px;
+}
+
+.payload-box label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.payload-box pre {
+  margin: 0;
+  padding: 10px 12px;
+  background: #1f2024;
+  color: #e8e4d8;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 .controls .row {
   display: flex;
   gap: 12px;

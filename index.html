@@ -19,9 +19,49 @@
 
   <main class="container">
     <section class="panel controls">
-      <div class="field">
-        <label for="data">내용 (URL 또는 텍스트)</label>
-        <textarea id="data" rows="3" placeholder="https://example.com">https://github.com/JAEWOOK6488/edie_qr_generator</textarea>
+      <div class="mode-tabs" role="tablist">
+        <button type="button" class="mode-tab active" data-mode="generic" role="tab">일반</button>
+        <button type="button" class="mode-tab" data-mode="edie" role="tab">🤖 Edie BLE 페어링</button>
+      </div>
+
+      <div id="genericFields">
+        <div class="field">
+          <label for="data">내용 (URL 또는 텍스트)</label>
+          <textarea id="data" rows="3" placeholder="https://example.com">https://github.com/JAEWOOK6488/edie_qr_generator</textarea>
+        </div>
+      </div>
+
+      <div id="edieFields" hidden>
+        <div class="row">
+          <div class="field">
+            <label for="edieId">로봇 ID (advertising name)</label>
+            <input type="text" id="edieId" value="EDIE_001" pattern="^EDIE_\d{3}$" placeholder="EDIE_001" />
+          </div>
+          <div class="field">
+            <label for="edieMtu">MTU 요청값</label>
+            <input type="number" id="edieMtu" value="247" min="23" max="517" />
+          </div>
+        </div>
+        <details class="edie-advanced">
+          <summary>고급 — UUID 직접 편집 (보통 그대로 두세요)</summary>
+          <div class="field">
+            <label for="edieSvc">Service UUID</label>
+            <input type="text" id="edieSvc" value="13ED935D-24D0-473C-A129-6659BD3CB1D8" />
+          </div>
+          <div class="field">
+            <label for="edieTx">Notify (TX) Characteristic UUID</label>
+            <input type="text" id="edieTx" value="BA087F5F-E068-4FA1-AA11-A8AAD60AE31F" />
+          </div>
+          <div class="field">
+            <label for="edieRx">Write (RX) Characteristic UUID</label>
+            <input type="text" id="edieRx" value="35D7B2A9-36AB-4003-BB15-9A03178AF5B9" />
+          </div>
+          <button type="button" id="edieResetUuids" class="ghost">기본 UUID로 복원</button>
+        </details>
+        <div class="payload-box">
+          <label>QR에 들어갈 페이로드 (JSON)</label>
+          <pre id="ediePayload"></pre>
+        </div>
       </div>
 
       <div class="row">
