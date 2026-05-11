@@ -24,23 +24,16 @@
     $('genericFields').hidden = (next !== 'generic');
     $('edieFields').hidden = (next !== 'edie');
     if (next === 'edie') {
-      applyStickerDefaults();
+      ensureScanSafeMinimums();
       syncEdiePayload();
     }
     generate();
   }
 
-  function applyStickerDefaults() {
-    $('dotColor').value = '#000000';
-    $('cornerColor').value = '#000000';
-    $('bgColor').value = '#ffffff';
-    $('transparentBg').checked = false;
-    $('useGradient').value = 'none';
-    $('ecLevel').value = 'H';
-    $('margin').value = '8';
-    $('dotStyle').value = 'square';
-    $('cornerSquareStyle').value = 'square';
-    $('cornerDotStyle').value = 'square';
+  // BLE 모드 진입 시 *인식률에 결정적인 것만* 보장. 모양/색상은 사용자 선택 유지.
+  function ensureScanSafeMinimums() {
+    if ($('ecLevel').value === 'L') $('ecLevel').value = 'H';
+    if (parseInt($('margin').value, 10) < 4) $('margin').value = '8';
   }
 
   function syncEdiePayload() {
