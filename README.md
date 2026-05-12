@@ -1,12 +1,12 @@
 # Edie QR 생성기
 
-색상, 모양, 로고를 자유롭게 커스터마이징할 수 있는 QR 코드 생성기입니다. **Edie BLE 페어링 모드**가 내장되어 있어, 로봇 ID만 입력하면 Unity 앱이 바로 인식해서 BLE 자동 연결할 수 있는 스티커용 QR을 만들 수 있습니다.
+색상, 모양, 로고를 자유롭게 커스터마이징할 수 있는 QR 코드 생성기입니다. **Edie BLE 페어링 모드**가 내장되어 있어, 로봇 ID만 입력하면 앱이 바로 인식해서 BLE 자동 연결 + WiFi 프로비저닝을 진행할 수 있는 스티커용 QR을 만들 수 있습니다.
 
 🔗 **데모**: https://jaewook6488.github.io/edie_qr_generator/
 
 ## 기능
 - **일반 모드**: URL/텍스트 → QR 코드 변환
-- **🤖 Edie BLE 페어링 모드**: 로봇 ID 입력 → Edie 스펙(BLE_SPEC.md v0.1)에 맞는 JSON 페이로드 QR 자동 생성
+- **🤖 Edie BLE 페어링 모드**: 로봇 ID/세대/시리얼 입력 → 식별 정보만 담은 미니멀 페이로드 QR 자동 생성 (BLE UUID는 앱이 하드코딩)
 - 점/코너 모양 선택 (사각형, 원형, 클래시, 라운드 등)
 - 단색 또는 선형/방사형 그라데이션
 - 배경색 또는 투명 배경
@@ -17,42 +17,43 @@
 
 ## Edie BLE 페어링 QR
 
-상단 탭에서 **🤖 Edie BLE 페어링**을 선택하면 다음 페이로드가 자동 생성됩니다:
+상단 탭에서 **🤖 Edie BLE 페어링**을 선택하면 다음 페이로드가 자동 생성됩니다 (QR 스키마 v1):
 
 ```json
 {
   "v": 1,
-  "type": "edie_ble",
-  "name": "EDIE_001",
-  "svc": "13ED935D-24D0-473C-A129-6659BD3CB1D8",
-  "tx":  "BA087F5F-E068-4FA1-AA11-A8AAD60AE31F",
-  "rx":  "35D7B2A9-36AB-4003-BB15-9A03178AF5B9",
-  "mtu": 247
+  "t": "edie_9",
+  "id": "EDIE_001",
+  "sn": "2026A001"
 }
 ```
 
-UUID는 `edie_ble/BLE_SPEC.md`와 동일합니다. 로봇 ID(`EDIE_XXX`)만 바꾸면 각 기체별 스티커를 찍어낼 수 있습니다.
+| 필드 | 의미 | 비고 |
+|---|---|---|
+| `v`  | QR 페이로드 스키마 버전 | 앱이 호환성 체크 |
+| `t`  | 제품 세대 | `edie_9`, `edie_10`, ... 미래 세대마다 BLE 사양/명령이 갈라질 수 있어 분기에 사용 |
+| `id` | Advertising name | `BLE_SPEC.md §2`의 `^EDIE_\d{3}$` 와 일치. BLE scan filter 키 |
+| `sn` | 제조 시리얼 (optional) | A/S·보증·서버 등록용 |
+
+**BLE Service/TX/RX UUID는 QR에 들어가지 않습니다.** 모든 EDIE 로봇이 동일한 UUID(`BLE_SPEC.md §3`)를 쓰므로 앱에 하드코딩하는 것이 정답입니다. 페이로드를 짧게 유지해 QR 모듈 수 감소 → 스캔 거리/가독성 향상.
+
+**WiFi 자격증명도 QR에 들어가지 않습니다.** SSID/PW는 BLE 연결 후 `send_wifi_info` 명령(`BLE_SPEC.md §7.2`)으로 앱이 로봇에 전달합니다.
 
 ### QR 출력 형식 (스캐너에 노출되는 내용)
 
-일반 카메라 앱으로 QR을 스캔하면 안에 든 텍스트가 그대로 보입니다. UUID 같은 내용을 숨기려면 세 가지 형식 중 선택할 수 있습니다.
-
-| 형식 | QR 내용 | 카메라 앱 표시 |
+| 형식 | QR 내용 | 일반 카메라 앱 동작 |
 |---|---|---|
-| **URI 딥링크** (기본) | `edie://pair?d=<base64url(JSON)>` | "Edie 앱에서 열기" |
-| **URL 링크** | `https://jaewook6488.github.io/edie_qr_generator/p.html#<base64url>` | 링크 → `p.html`이 `edie://`로 자동 리다이렉트 |
-| **JSON 평문** | `{"v":1,"name":"EDIE_001",...}` | UUID 등이 그대로 노출 (디버깅용) |
+| **URL 링크** (기본, 권장) | `https://jaewook6488.github.io/edie_qr_generator/p.html#<base64url>` | 안내 페이지 열림 → 모바일이면 자동으로 `edie://` 딥링크 시도 (앱 미설치 시 페이지 유지) |
+| **URI 딥링크** | `edie://pair?d=<base64url(JSON)>` | 앱이 OS에 핸들러 등록되어 있으면 자동 실행, 아니면 "사용할 수 없는 QR" 표시 |
+| **JSON 평문** | `{"v":1,"t":"edie_9","id":"EDIE_001","sn":"2026A001"}` | 텍스트 그대로 노출 (디버깅용) |
 
-- URI/URL 형식은 base64url로 인코딩되어 UUID가 사람 눈에 보이지 않습니다.
-- Unity 앱은 OS에 `edie://` URL Scheme(Android: intent filter, iOS: Info.plist `CFBundleURLSchemes`)을 등록해야 자동 실행됩니다.
-- URL 형식의 `p.html`은 모바일 접속 시 자동으로 `edie://` 딥링크를 시도. 앱 없으면 안내 페이지 표시.
+URL/URI 형식은 페이로드가 base64url로 인코딩되어 사람 눈에는 무작위 문자열로 보입니다. base64url 규칙: 표준 base64 결과에서 `+` → `-`, `/` → `_`, 패딩 `=` 제거.
 
-### Unity (Central) 측 처리 흐름
+### 앱 측 처리 흐름
 
 ```csharp
 using System;
 using System.Text;
-using System.Web;  // System.Web.dll 참조
 
 string DecodeQrPayload(string qrText) {
     string b64;
@@ -61,9 +62,8 @@ string DecodeQrPayload(string qrText) {
     } else if (qrText.Contains("/p.html#")) {
         b64 = qrText.Substring(qrText.IndexOf('#') + 1);
     } else {
-        return qrText;  // JSON 평문 형식
+        return qrText;  // JSON 평문
     }
-    // base64url → base64
     b64 = b64.Replace('-', '+').Replace('_', '/');
     int pad = (4 - b64.Length % 4) % 4;
     b64 += new string('=', pad);
@@ -73,13 +73,15 @@ string DecodeQrPayload(string qrText) {
 // 1. QR 디코드 + JSON 파싱
 var json = DecodeQrPayload(qrText);
 var payload = JsonUtility.FromJson<EdiePayload>(json);
-if (payload.type != "edie_ble" || payload.v != 1) throw new Exception("not an edie QR");
+if (payload.v != 1)         throw new Exception("unsupported QR schema");
+if (payload.t != "edie_9")  throw new Exception("unsupported product gen");
 
-// 2. BLE 스캔 — Service UUID로 필터, Name으로 매칭
+// 2. BLE 스캔 — 앱에 하드코딩된 Service UUID로 필터, payload.id(name)로 매칭
+const string EDIE_SVC = "13ED935D-24D0-473C-A129-6659BD3CB1D8";
 BluetoothLEHardwareInterface.ScanForPeripheralsWithServices(
-    new[] { payload.svc },
+    new[] { EDIE_SVC },
     (address, name) => {
-        if (name == payload.name) {
+        if (name == payload.id) {
             BluetoothLEHardwareInterface.StopScan();
             BluetoothLEHardwareInterface.ConnectToPeripheral(address,
                 onConnect, onService, onChar, onDisconnect);
@@ -87,7 +89,8 @@ BluetoothLEHardwareInterface.ScanForPeripheralsWithServices(
     });
 
 // 3. 연결 후: MTU 요청 → Notify CCCD enable → request_status (BLE_SPEC §11)
-// 4. 수신 버퍼는 \n 단위로 잘라 JSON 파싱
+// 4. status notify의 edie_id가 payload.id와 일치하는지 검증
+// 5. 사용자에게 WiFi SSID/PW 입력받아 send_wifi_info 명령 전송 (BLE_SPEC §7.2)
 ```
 
 ### 권장 스티커 사양
