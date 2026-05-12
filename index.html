@@ -38,36 +38,24 @@
             <input type="text" id="edieId" value="EDIE_001" pattern="^EDIE_\d{3}$" placeholder="EDIE_001" />
           </div>
           <div class="field">
-            <label for="edieMtu">MTU 요청값</label>
-            <input type="number" id="edieMtu" value="247" min="23" max="517" />
+            <label for="edieType">제품 타입 (세대)</label>
+            <input type="text" id="edieType" value="edie_9" placeholder="edie_9" />
+          </div>
+          <div class="field">
+            <label for="edieSn">제조 시리얼</label>
+            <input type="text" id="edieSn" value="2026A001" placeholder="2026A001" />
           </div>
         </div>
         <div class="row">
           <div class="field">
-            <label for="edieFormat">QR 출력 형식 (내용 숨김 여부)</label>
+            <label for="edieFormat">QR 출력 형식</label>
             <select id="edieFormat">
-              <option value="uri" selected>URI 딥링크 — edie:// (내용 숨김, 추천)</option>
-              <option value="url">URL 링크 — https:// (Universal Link)</option>
-              <option value="json">JSON 평문 (디버깅용, 내용 노출)</option>
+              <option value="url" selected>URL 링크 — https:// (카메라 오스캔 시 안내 페이지로, 추천)</option>
+              <option value="uri">URI 딥링크 — edie://</option>
+              <option value="json">JSON 평문 (디버깅용)</option>
             </select>
           </div>
         </div>
-        <details class="edie-advanced">
-          <summary>고급 — UUID 직접 편집 (보통 그대로 두세요)</summary>
-          <div class="field">
-            <label for="edieSvc">Service UUID</label>
-            <input type="text" id="edieSvc" value="13ED935D-24D0-473C-A129-6659BD3CB1D8" />
-          </div>
-          <div class="field">
-            <label for="edieTx">Notify (TX) Characteristic UUID</label>
-            <input type="text" id="edieTx" value="BA087F5F-E068-4FA1-AA11-A8AAD60AE31F" />
-          </div>
-          <div class="field">
-            <label for="edieRx">Write (RX) Characteristic UUID</label>
-            <input type="text" id="edieRx" value="35D7B2A9-36AB-4003-BB15-9A03178AF5B9" />
-          </div>
-          <button type="button" id="edieResetUuids" class="ghost">기본 UUID로 복원</button>
-        </details>
         <div class="payload-box">
           <label>실제 QR 내용 (스캐너가 읽는 텍스트)</label>
           <pre id="edieQrText"></pre>
@@ -203,6 +191,6 @@
   </footer>
 
   <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

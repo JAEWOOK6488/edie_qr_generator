@@ -1,5 +1,5 @@
 (function () {
-  console.log('[Edie QR] v4 loaded');
+  console.log('[Edie QR] v5 loaded');
 
   const URL_BASE = 'https://jaewook6488.github.io/edie_qr_generator/p.html';
 
@@ -10,13 +10,6 @@
     return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
   const DEFAULT_LOGO = 'assets/edie.png';
-
-  const DEFAULT_BLE = {
-    svc: '13ED935D-24D0-473C-A129-6659BD3CB1D8',
-    tx:  'BA087F5F-E068-4FA1-AA11-A8AAD60AE31F',
-    rx:  '35D7B2A9-36AB-4003-BB15-9A03178AF5B9',
-    mtu: 247,
-  };
 
   const $ = (id) => document.getElementById(id);
   const container = $('qrContainer');
@@ -39,7 +32,6 @@
     generate();
   }
 
-  // BLE 모드 진입 시 *인식률에 결정적인 것만* 보장. 모양/색상은 사용자 선택 유지.
   function ensureScanSafeMinimums() {
     if ($('ecLevel').value === 'L') $('ecLevel').value = 'H';
     if (parseInt($('margin').value, 10) < 4) $('margin').value = '8';
@@ -48,13 +40,12 @@
   function syncEdiePayload() {
     const payload = {
       v: 1,
-      type: 'edie_ble',
-      name: ($('edieId').value || '').trim() || 'EDIE_001',
-      svc: ($('edieSvc').value || '').trim(),
-      tx:  ($('edieTx').value  || '').trim(),
-      rx:  ($('edieRx').value  || '').trim(),
-      mtu: parseInt($('edieMtu').value, 10) || 247,
+      t: ($('edieType').value || '').trim() || 'edie_9',
+      id: ($('edieId').value || '').trim() || 'EDIE_001',
+      sn: ($('edieSn').value || '').trim(),
     };
+    if (!payload.sn) delete payload.sn;
+
     const json = JSON.stringify(payload);
     const fmt = $('edieFormat').value;
     let qrText;
@@ -158,7 +149,7 @@
     btn.addEventListener('click', () => setMode(btn.dataset.mode));
   });
 
-  ['edieId', 'edieSvc', 'edieTx', 'edieRx', 'edieMtu'].forEach((id) => {
+  ['edieId', 'edieType', 'edieSn'].forEach((id) => {
     $(id).addEventListener('input', () => {
       syncEdiePayload();
       generate();
@@ -166,15 +157,6 @@
   });
 
   $('edieFormat').addEventListener('change', () => {
-    syncEdiePayload();
-    generate();
-  });
-
-  $('edieResetUuids').addEventListener('click', () => {
-    $('edieSvc').value = DEFAULT_BLE.svc;
-    $('edieTx').value  = DEFAULT_BLE.tx;
-    $('edieRx').value  = DEFAULT_BLE.rx;
-    $('edieMtu').value = String(DEFAULT_BLE.mtu);
     syncEdiePayload();
     generate();
   });
